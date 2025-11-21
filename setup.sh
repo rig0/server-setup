@@ -194,7 +194,7 @@ case $panel in
         curl -o setup-repos.sh https://raw.githubusercontent.com/webmin/webmin/master/setup-repos.sh
         chmod +x /root/setup-repos.sh
         /root/setup-repos.sh
-        apt-get install -y webmin --install-recommends
+        apt install -y webmin --install-recommends
 
         # Grab the fixed openvpn module to install via ui
         wget https://github.com/a-schild/webmin-openvpn-debian-jessie/raw/master/openvpn.wbm.gz
