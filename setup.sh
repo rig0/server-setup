@@ -178,28 +178,10 @@ case $panel in
         # Add to hosts file
         echo "$ip $hostname" >> /etc/hosts
 
-        # Install CloudPanel (fetch latest installer + checksum)
-        installer_url="https://installer.cloudpanel.io/ce/v2/install.sh"
-        curl -sS "$installer_url" -o install.sh
-        curl -sS "${installer_url}.sha256" -o install.sh.sha256
-
-        # CloudPanel sometimes publishes a raw hash or other formats; normalize to "hash  install.sh"
-        if ! sha256sum -c install.sh.sha256 >/dev/null 2>&1; then
-            hash=$(grep -Eo '[A-Fa-f0-9]{64}' install.sh.sha256 | head -n1)
-            if [[ -n "$hash" ]]; then
-                printf "%s  install.sh\n" "$hash" > install.sh.sha256
-            else
-                printf "CloudPanel installer checksum missing or unreadable. Not running installer.\n"
-                exit 1
-            fi
-        fi
-
-        if sha256sum -c install.sh.sha256; then
-            sudo bash install.sh
-        else
-            printf "CloudPanel installer checksum failed. Not running installer.\n"
-            exit 1
-        fi
+        # Install CloudPanel with published checksum
+        curl -sS https://installer.cloudpanel.io/ce/v2/install.sh -o install.sh; \
+        echo "19cfa702e7936a79e47812ff57d9859175ea902c62a68b2c15ccd1ebaf36caeb install.sh" | \
+        sha256sum -c && sudo DB_ENGINE=MARIADB_11.4 bash install.sh
 
         # Get u
         user_ip=$(echo $SSH_CLIENT | awk '{print $1}')
