@@ -1,6 +1,8 @@
 #!/bin/bash
-#RAMBO SERVER SETUP SCRIPT 2024. [DEBIAN 9-12]
 
+# Server setup script by Rigo Sotomayor. 
+# Intended for Debian/Ubuntu systems.
+# Run on a fresh system with root access
 
 # Initiliaze possible arguments
 user="" # username to create with sudo privelages
