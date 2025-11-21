@@ -53,7 +53,7 @@ Installs [Dockge](https://github.com/louislam/dockge)
 Installs Docker & [Portainer CE](https://www.portainer.io/) (UI on port 9443)
 
 - ``panel=cloudpanel``
-Installs [CloudPanel](https://cloudpanel.io) using the latest installer and checksum (accepts raw hash or formatted checksum file)
+Installs [CloudPanel](https://cloudpanel.io) using the latest installer and checksum (auto-normalizes raw hash/checksum formats)
 
 - ``panel=webmin``
 Installs [Webmin](https://tinycp.com/)

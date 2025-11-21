@@ -183,10 +183,15 @@ case $panel in
         curl -sS "$installer_url" -o install.sh
         curl -sS "${installer_url}.sha256" -o install.sh.sha256
 
-        # CloudPanel publishes a raw hash; format it for sha256sum -c
-        if grep -Eq '^[A-Fa-f0-9]{64}$' install.sh.sha256; then
-            hash=$(head -n1 install.sh.sha256)
-            printf "%s  install.sh\n" "$hash" > install.sh.sha256
+        # CloudPanel sometimes publishes a raw hash or other formats; normalize to "hash  install.sh"
+        if ! sha256sum -c install.sh.sha256 >/dev/null 2>&1; then
+            hash=$(grep -Eo '[A-Fa-f0-9]{64}' install.sh.sha256 | head -n1)
+            if [[ -n "$hash" ]]; then
+                printf "%s  install.sh\n" "$hash" > install.sh.sha256
+            else
+                printf "CloudPanel installer checksum missing or unreadable. Not running installer.\n"
+                exit 1
+            fi
         fi
 
         if sha256sum -c install.sh.sha256; then
