@@ -36,10 +36,10 @@ If `usrkey` **and** `appkey` are provided:
 - Sends a “Server Setup Complete” push at the end of the run.
 
 ## Panels/tools
-- `panel=dockge` – installs Docker and [Dockge](https://github.com/louislam/dockge) (port 5001 bound to 127.0.0.1)
-- `panel=portainer` – installs Docker and [Portainer CE](https://www.portainer.io/) (port 9443, UFW allowlist for the connecting IP if known)
-- `panel=cloudpanel` – installs [CloudPanel](https://cloudpanel.io) with published installer hash (MariaDB 11.4)
-- `panel=webmin` – installs [Webmin](https://webmin.com/)
+- `panel=dockge` – installs Docker and [Dockge](https://github.com/louislam/dockge) (UI port `5001` bound to `127.0.0.1`)
+- `panel=portainer` – installs Docker and [Portainer CE](https://www.portainer.io/) (UI port `9443`)
+- `panel=cloudpanel` – installs [CloudPanel](https://cloudpanel.io) (UI port `8443`)
+- `panel=webmin` – installs [Webmin](https://webmin.com/) (UI port `10000`)
 - `panel=steam` – installs `steamcmd` and applies game-server sysctl/limits
 
 ## Notes
