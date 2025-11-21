@@ -45,7 +45,7 @@ done
 
 # Check if required arguments are provided
 if [[ -z $user || -z $hostname ]]; then
-  printf "Usage: $0 user=username hostname=hostname usrkey=pushoveruserkey* appkey=pushoverappkey* panel=cloudpanel|webmin|dockge|portainer|openvpn|steam* proxmox=1* sshkey=yourpubkey* \n *=optional"
+  printf "Usage: $0 user=username hostname=hostname usrkey=pushoveruserkey* appkey=pushoverappkey* panel=cloudpanel|webmin|dockge|portainer|steam* proxmox=1* sshkey=yourpubkey* \n *=optional"
   exit 1
 fi
 
@@ -194,14 +194,6 @@ case $panel in
         curl -o webmin-setup-repo.sh https://raw.githubusercontent.com/webmin/webmin/master/webmin-setup-repo.sh
         sudo sh webmin-setup-repo.sh
         apt install -y webmin --install-recommends
-        ;;
-    openvpn)
-        printf "$ST Installing OpenVPN \n $SB"
-        
-        git https://rigslab.com/Rambo/OpenVPN-Installer.git
-        chmod +x ./OpenVPN-Installer/opv-installer.sh
-        ./OpenVPN-Installer/opv-installer.sh 9070
-        rm -R ./OpenVPN-Installer
         ;;
     steam)
         printf "$ST Installing Steam and Configuring system for game servers \n $SB"
