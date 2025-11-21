@@ -182,7 +182,19 @@ case $panel in
         installer_url="https://installer.cloudpanel.io/ce/v2/install.sh"
         curl -sS "$installer_url" -o install.sh
         curl -sS "${installer_url}.sha256" -o install.sh.sha256
-        sha256sum -c install.sh.sha256 && sudo bash install.sh
+
+        # CloudPanel publishes a raw hash; format it for sha256sum -c
+        if grep -Eq '^[A-Fa-f0-9]{64}$' install.sh.sha256; then
+            hash=$(head -n1 install.sh.sha256)
+            printf "%s  install.sh\n" "$hash" > install.sh.sha256
+        fi
+
+        if sha256sum -c install.sh.sha256; then
+            sudo bash install.sh
+        else
+            printf "CloudPanel installer checksum failed. Not running installer.\n"
+            exit 1
+        fi
 
         # Get u
         user_ip=$(echo $SSH_CLIENT | awk '{print $1}')
