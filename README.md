@@ -1,71 +1,48 @@
 # Server Setup
 
-***Must be ran as root on a fresh installation***
+Automates the first bootstrap of a fresh Debian/Ubuntu server: updates the OS, creates a sudo user, locks down SSH, enables firewall, installs a custom MOTD, and can optionally wire up Pushover alerts and control panels.
 
-## Copy and Install
-
+## Quick start
+Run as root on a new server:
 ```bash
-curl -O https://rigslab.com/Rambo/server-setup/raw/branch/main/setup.sh && chmod +x setup.sh && ./setup.sh hostname=HOSTNAME user=USERNAME
+curl -O https://rigslab.com/Rambo/server-setup/raw/branch/main/setup.sh
+chmod +x setup.sh
+./setup.sh hostname=HOSTNAME user=USERNAME usrkey=PUSHOVER_USER appkey=PUSHOVER_APP sshkey="ssh-rsa AAA..."
 ```
+Only `hostname` and `user` are required; everything else is optional.
 
 ## Arguments
+- `hostname` (required) – hostname/FQDN to set, also used as the Pushover title
+- `user` (required) – sudo user to create
+- `sshkey` (optional) – public key to add to `/root/.ssh/authorized_keys` before copying to the new user
+- `usrkey` (optional) – Pushover user key (must accompany `appkey`)
+- `appkey` (optional) – Pushover app token (must accompany `usrkey`)
+- `panel` (optional) – `cloudpanel`, `webmin`, `dockge`, `portainer`, `openvpn`, or `steam`
+- `proxmox` (optional) – set to `1` to install `qemu-guest-agent`
 
-- **hostname:** Hostname
-- **user:** User to be created with sudo privelages
-- *sshkey*:* Your ssh client public sshkey
-- *usrkey*:* Pushover user api key
-- *appkey*:* Pushover app api key
-- *panel*:* Software to install (cloudpanel, webmin, dockge, portainer, openvpn, steam)
-- *proxmox*:* 1 if system is a proxmox virtual machine
+## What it does
+- Updates/Upgrades packages, installs basics: `sudo`, `screen`, `curl`, `git`, `ufw`, `openssl`, `rsync`, `cron`, `neofetch`
+- Creates the sudo user, copies SSH keys, disables root SSH and password auth
+- Enables UFW (port 22 allowed), disables IPv6
+- Installs MOTD extras (`lolcat`, `linuxlogo`, `toilet`, `figlet`, `cowsay`, `fortune`) and writes a custom MOTD
+- Sets Tabby-friendly prompt bits in the user’s `.bashrc`
+- Optional: installs Pushover CLI and sends SSH-login + completion notifications when `usrkey` and `appkey` are provided
+- Optional: installs a control panel/tool when `panel` is set
 
-*= Optional
+## Pushover behavior
+If `usrkey` **and** `appkey` are provided:
+- Installs the Pushover CLI via `install-pushover.sh` with defaults: `title="$hostname"`, `sound="gamelan"`, `url="ssh://<server-ip>:22"`.
+- Adds a `.bashrc` snippet that sends `pushover message="SSH login: $(whoami) from <ip>"` on SSH login (guarded against repeats).
+- Sends a “Server Setup Complete” push at the end of the run.
 
-## Summary
+## Panels/tools
+- `panel=dockge` – installs Docker and [Dockge](https://github.com/louislam/dockge) (port 5001 bound to 127.0.0.1)
+- `panel=portainer` – installs Docker and [Portainer CE](https://www.portainer.io/) (port 9443, UFW allowlist for the connecting IP if known)
+- `panel=cloudpanel` – installs [CloudPanel](https://cloudpanel.io) with published installer hash (MariaDB 11.4)
+- `panel=webmin` – installs [Webmin](https://webmin.com/)
+- `panel=steam` – installs `steamcmd` and applies game-server sysctl/limits
 
-- Updates system then installs: ***screen, git, ufw, openssl, rsync, cron, neofetch***
-- Creates a user with sudo privelages
-- Copies root ssh keys & authorized_keys to created user
-- Locks out root user from ssh access
-- Disables password ssh logins
-- Sets the hostname
-- Disables IPV6
-- Enables ufw and allows port 22 for ssh
-- Configures env variables to play nice with Tabby ssh client
-- Installs vanity software for custom motd: ***lolcat linuxlogo toilet figlet cowsay fortune***
-- Customizes the motd to add a little life to logins 
-
-## Optional
-
-- ``usrkey=pushover_user_key`` & ``appkey=pushover_app_key``
-Installs [Pushover script](https://rigslab.com/Rambo/Pushover) & Creates notifications on login
-
-- ``proxmox=1``
-Installs QEMU Guest Agent for proxmox virtual machines
-
-- ``sshkey="ssh-rsa yourPublicKey user@host"``
-Adds your ssh client's pubkey to authorized_keys if not pre-configured
-
-**Panels/Software**
-- ``panel=dockge``
-Installs [Dockge](https://github.com/louislam/dockge)
-
-- ``panel=portainer``
-Installs Docker & [Portainer CE](https://www.portainer.io/) (UI on port 9443)
-
-- ``panel=cloudpanel``
-Installs [CloudPanel](https://cloudpanel.io) using the published installer hash (DB engine: MariaDB 11.4)
-
-- ``panel=webmin``
-Installs [Webmin](https://webmin.com/)
-
-- ``panel=openvpn``
-Installs [OpenVPN](https://rigslab.com/Rambo/OpenVPN-Installer) 
-
-- ``panel=steam``
-Installs steamcmd and adjust system setttings to play nice with game servers
-
-
-## To Do:
-- Make user creation optional for the scenario where a user is pre configured and root has been pre disabled
-- Make tabby envs optional (ex. tabby=1)
-- Make motd and vanity stuff optional (ex. vanity=1)
+## Notes
+- UFW is enabled non-interactively (`ufw --force enable`).
+- SSH keys are generated non-interactively (`/root/.ssh/id_rsa`) if none exist; provide `sshkey` to seed a client key.
+- Keep backups of your `sshkey` and Pushover tokens; rerun the script with the same values if you need to reinstall.

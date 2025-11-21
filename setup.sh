@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Server setup script by Rigo Sotomayor. 
+# Server setup script by rig0. 
 # Intended for Debian/Ubuntu systems.
 # Run on a fresh system with root access
 
@@ -64,26 +64,26 @@ apt install sudo screen curl git ufw openssl rsync cron neofetch -y
 
 # Installing qemu-guest-agent if server is a proxmox machine
 if [[ "$proxmox" -eq 1 ]]; then
-  apt install qemu-guest-agent
+  apt install qemu-guest-agent -y
 fi
 
 printf "$ST Creating Main User. Set your password: \n $SB"
-adduser $user
-usermod -aG sudo $user
-echo  $user"   ALL=(ALL:ALL) ALL" >> /etc/sudoers
+adduser "$user"
+usermod -aG sudo "$user"
+echo "$user   ALL=(ALL:ALL) ALL" >> /etc/sudoers
 
 # Check if pushover options were passed
 if [[ -n $usrkey && -n $appkey ]]; then
         printf "$ST Downloading and configuring Pushover notifications. \n $SB"
 
-        #get main interface ip
+        # Get main interface ip
         ip=$(ip route get 8.8.8.8 | awk '/src/ {print $7}')
 
-        #pushover notification options
+        # Pushover notification options
         PO_SOUND="gamelan"
         PO_URL="ssh://$ip:22"
 
-        # download pushover script
+        # Download pushover script
         tmpdir=$(mktemp -d)
         git clone https://rigslab.com/Rambo/pushover.git "$tmpdir/pushover"
         chmod +x "$tmpdir/pushover/install-pushover.sh"
@@ -106,29 +106,37 @@ fi
 
 printf "$ST Securing SSH and Generating keys \n $SB"
 
-#disable root login
+# Disable root login
 sed -i -e 's/#PermitRootLogin\ prohibit-password/PermitRootLogin\ no/g' /etc/ssh/sshd_config # this covers proxmox cloud init defaults
 sed -i -e 's/PermitRootLogin\ yes/PermitRootLogin\ no/g' /etc/ssh/sshd_config # this covers most vps' defaults
 
-# disable password auth
+# Disable password auth
 sed -i -e 's/#PasswordAuthentication yes/PasswordAuthentication\ no/g' /etc/ssh/sshd_config 
 
-#generate ssh keys
-ssh-keygen
-echo "$sshkey" >> /root/.ssh/authorized_keys
+# Generate ssh keys (non-interactive) and configure auth keys
+mkdir -p /root/.ssh
+chmod 700 /root/.ssh
+if [[ ! -f /root/.ssh/id_rsa ]]; then
+  ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa -q
+fi
+touch /root/.ssh/authorized_keys
+if [[ -n "$sshkey" ]]; then
+  echo "$sshkey" >> /root/.ssh/authorized_keys
+fi
+chmod 600 /root/.ssh/authorized_keys
 
-#copy keys to main user and set perms
-mkdir /home/$user/.ssh
-cp -R /root/.ssh/* /home/$user/.ssh/
-chown -R $user:$user /home/$user/.ssh/
-chmod 700 /home/$user/.ssh/
-chmod 600 /home/$user/.ssh/authorized_keys
-chmod 600 /home/$user/.ssh/id_rsa
-chmod 644 /home/$user/.ssh/id_rsa.pub
+# Copy keys to main user and set perms
+mkdir -p "/home/$user/.ssh"
+cp -a /root/.ssh/. "/home/$user/.ssh/"
+chown -R "$user:$user" "/home/$user/.ssh/"
+chmod 700 "/home/$user/.ssh/"
+chmod 600 "/home/$user/.ssh/authorized_keys"
+chmod 600 "/home/$user/.ssh/id_rsa"
+chmod 644 "/home/$user/.ssh/id_rsa.pub"
 service sshd restart
 
 printf "$ST Setting hostname \n $SB"
-hostnamectl set-hostname $hostname
+hostnamectl set-hostname "$hostname"
 hostname
 
 printf "$ST Disabling ipv6 \n $SB"
@@ -136,21 +144,22 @@ sysctl -w net.ipv6.conf.all.disable_ipv6=1
 
 printf "$ST Configuring and enabling Firewall \n $SB"
 ufw allow 22/tcp
-ufw enable
+ufw --force enable
 
 printf "$ST Configuring Tabby env variables \n $SB"
-echo "#TABBY WORKING DIR SCRIPT" >> /home/$user/.bashrc
-echo "export PS1=\"\$PS1\[\e]1337;CurrentDir=\"'/home/$user\a\]'" >> /home/$user/.bashrc
+echo "#TABBY WORKING DIR SCRIPT" >> "/home/$user/.bashrc"
+echo "export PS1=\"\$PS1\[\e]1337;CurrentDir=\"'/home/$user\a\]'" >> "/home/$user/.bashrc"
 echo "Done."
 
 printf "$ST Customizing motd \n $SB"
 
 # Install prerequisites
-apt update && apt dist-upgrade -y
 apt install lolcat linuxlogo toilet figlet cowsay fortune -y
 
 # Backup up original motd
-mv /etc/motd /etc/motd.bak
+if [[ -f /etc/motd ]]; then
+  mv /etc/motd /etc/motd.bak
+fi
 
 # Comment out original linux os and kernel info
 sed -i -e 's/uname -snrvm/#uname -snrvm/g' /etc/update-motd.d/10-uname
@@ -181,8 +190,8 @@ case $panel in
         echo "19cfa702e7936a79e47812ff57d9859175ea902c62a68b2c15ccd1ebaf36caeb install.sh" | \
         sha256sum -c && sudo DB_ENGINE=MARIADB_11.4 bash install.sh
 
-        # Get u
-        user_ip=$(echo $SSH_CLIENT | awk '{print $1}')
+        # Get user ip and allow ufw access
+        user_ip=$(echo "$SSH_CLIENT" | awk '{print $1}')
         ufw allow from $user_ip to any port 8443
         ;;
     webmin)
@@ -200,7 +209,7 @@ case $panel in
         apt install lib32gcc-s1 software-properties-common -y
         dpkg --add-architecture i386
         add-apt-repository -U http://deb.debian.org/debian -c non-free-firmware -c non-free
-        apt update && apt install steamcmd
+        apt update && apt install steamcmd -y
 
         # Pre-req settings for ac game servers
         sysctl -w net.core.wmem_default=2000000
@@ -225,7 +234,7 @@ case $panel in
         apt update && apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
 
         # Add user to docker group
-        usermod -aG docker $user
+        usermod -aG docker "$user"
 
         # Install dockge
         mkdir -p /opt/dockge /opt/stacks
@@ -249,7 +258,7 @@ case $panel in
         apt update && apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
 
         # Add user to docker group
-        usermod -aG docker $user
+        usermod -aG docker "$user"
 
         # Deploy portainer
         docker volume create portainer_data
@@ -269,7 +278,7 @@ case $panel in
 esac
 
 printf "$ST Server Setup Complete! \n$SB"
-if [[ -n $usrkey ]]; then
+if [[ -n $usrkey && -n $appkey ]]; then
   # Send notification if pushover installed
   pushover "Server Setup Complete" 
 fi
