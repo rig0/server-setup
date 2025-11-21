@@ -56,7 +56,7 @@ Installs Docker & [Portainer CE](https://www.portainer.io/) (UI on port 9443)
 Installs [CloudPanel](https://cloudpanel.io) using the published installer hash (DB engine: MariaDB 11.4)
 
 - ``panel=webmin``
-Installs [Webmin](https://tinycp.com/)
+Installs [Webmin](https://webmin.com/)
 
 - ``panel=openvpn``
 Installs [OpenVPN](https://rigslab.com/Rambo/OpenVPN-Installer) 
