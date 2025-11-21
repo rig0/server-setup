@@ -80,7 +80,7 @@ if [[ -n $usrkey && -n $appkey ]]; then
         ip=$(ip route get 8.8.8.8 | awk '/src/ {print $7}')
 
         # Pushover notification options
-        PO_SOUND="gamelan"
+        PO_SOUND="info"
         PO_URL="ssh://$ip:22"
 
         # Download pushover script
@@ -96,7 +96,7 @@ if [[ -n $usrkey && -n $appkey ]]; then
 if [[ -n "$SSH_CONNECTION" && -z "$PUSHOVER_LOGIN_SENT" ]]; then
   export PUSHOVER_LOGIN_SENT=1
   login_from="${SSH_CLIENT%% *}"
-  pushover message="SSH login: $(whoami) from ${login_from:-unknown}"
+  pushover message="SSH login: $(whoami) from ${login_from:-unknown}" sound=sifi-lock
 fi
 EOF
 elif [[ -n $usrkey || -n $appkey ]]; then
