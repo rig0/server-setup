@@ -154,7 +154,7 @@ echo "Done."
 printf "$ST Customizing motd \n $SB"
 
 # Install prerequisites
-apt install lolcat linuxlogo toilet figlet cowsay fortune -y
+apt install lolcat linuxlogo toilet figlet cowsay fortune-mod -y
 
 # Backup up original motd
 mv /etc/motd /etc/motd.bak
@@ -171,6 +171,14 @@ echo "  toilet -f ivrit \"$HOSTNAME\"" >> /etc/update-motd.d/99-custom-motd
 echo "  linuxlogo -a -g -u -d -s -k -F \"Debian $(cat /etc/debian_version) Bookworm \n#O Kernel #V \n#M #T #R RAM \n#U\"" >> /etc/update-motd.d/99-custom-motd
 echo "} | /usr/games/lolcat -p 13 --force" >> /etc/update-motd.d/99-custom-motd
 chmod +x /etc/update-motd.d/99-custom-motd
+
+# Fallback: ensure MOTD shows even if pam_motd is skipped
+cat <<'EOF' >/etc/profile.d/zz-show-motd.sh
+# Show MOTD in interactive shells if pam_motd did not run
+if [ -z "$MOTD_SHOWN" ] && [ -n "$PS1" ] && [ -t 1 ] && [ -r /run/motd.dynamic ]; then
+  cat /run/motd.dynamic
+fi
+EOF
 
 # Check for panel option
 case $panel in
