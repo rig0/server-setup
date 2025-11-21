@@ -45,7 +45,7 @@ done
 
 # Check if required arguments are provided
 if [[ -z $user || -z $hostname ]]; then
-  printf "Usage: $0 user=username hostname=hostname usrkey=pushoveruserkey* appkey=pushoverappkey* panel=cloudpanel|tinycp|webmin|dockge|portainer|openvpn|steam* proxmox=1* sshkey=yourpubkey* \n *=optional"
+  printf "Usage: $0 user=username hostname=hostname usrkey=pushoveruserkey* appkey=pushoverappkey* panel=cloudpanel|webmin|dockge|portainer|openvpn|steam* proxmox=1* sshkey=yourpubkey* \n *=optional"
   exit 1
 fi
 
@@ -186,21 +186,6 @@ case $panel in
         # Get u
         user_ip=$(echo $SSH_CLIENT | awk '{print $1}')
         ufw allow from $user_ip to any port 8443
-        ;;
-    tinycp)
-        printf "$ST Installing TinyCP \n $SB"
-
-        # Define the character set for a password
-        chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-
-        # Generate a random 10-character password
-        password=$(openssl rand -base64 12 | tr -dc $chars | head -c 10)
-
-        # Install tinycp
-        apt install apt-transport-https dirmngr gnupg ca-certificates
-        apt-key adv --fetch-keys http://repos.tinycp.com/debian/conf/gpg.key
-        echo "deb http://repos.tinycp.com/debian all main" | sudo tee /etc/apt/sources.list.d/tinycp.list
-        apt-get update && TINYCP_USER="$user" TINYCP_PASS=$password TINYCP_PORT="37337" apt-get install tinycp
         ;;
     webmin)
         printf "$ST Installing Webmin \n $SB"

@@ -15,7 +15,7 @@ curl -O https://rigslab.com/Rambo/server-setup/raw/branch/main/setup.sh && chmod
 - *sshkey*:* Your ssh client public sshkey
 - *usrkey*:* Pushover user api key
 - *appkey*:* Pushover app api key
-- *panel*:* Software to install (cloudpanel, tinycp, webmin, dockge, portainer, openvpn, steam)
+- *panel*:* Software to install (cloudpanel, webmin, dockge, portainer, openvpn, steam)
 - *proxmox*:* 1 if system is a proxmox virtual machine
 
 *= Optional
@@ -54,9 +54,6 @@ Installs Docker & [Portainer CE](https://www.portainer.io/) (UI on port 9443)
 
 - ``panel=cloudpanel``
 Installs [CloudPanel](https://cloudpanel.io) (will break on next update, needs fixing)
-
-- ``panel=tinycp``
-Installs [TinyCP](https://tinycp.com/)
 
 - ``panel=webmin``
 Installs [Webmin](https://tinycp.com/)
