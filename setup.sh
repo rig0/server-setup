@@ -191,13 +191,9 @@ case $panel in
         printf "$ST Installing Webmin \n $SB"
 
         # Get latest version
-        curl -o setup-repos.sh https://raw.githubusercontent.com/webmin/webmin/master/setup-repos.sh
-        chmod +x /root/setup-repos.sh
-        /root/setup-repos.sh
+        curl -o webmin-setup-repo.sh https://raw.githubusercontent.com/webmin/webmin/master/webmin-setup-repo.sh
+        sudo sh webmin-setup-repo.sh
         apt install -y webmin --install-recommends
-
-        # Grab the fixed openvpn module to install via ui
-        wget https://github.com/a-schild/webmin-openvpn-debian-jessie/raw/master/openvpn.wbm.gz
         ;;
     openvpn)
         printf "$ST Installing OpenVPN \n $SB"
