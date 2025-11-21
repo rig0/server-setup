@@ -31,8 +31,8 @@ Only `hostname` and `user` are required; everything else is optional.
 
 ## Pushover behavior
 If `usrkey` **and** `appkey` are provided:
-- Installs the Pushover CLI via `install-pushover.sh` with defaults: `title="$hostname"`, `sound="gamelan"`, `url="ssh://<server-ip>:22"`.
-- Adds a `.bashrc` snippet that sends `pushover message="SSH login: $(whoami) from <ip>"` on SSH login (guarded against repeats).
+- Installs the Pushover CLI via `install-pushover.sh` with defaults: `title="$hostname"`, `sound="info"`, `url="ssh://<server-ip>:22"`.
+- Adds a `.bashrc` snippet that sends `pushover message="SSH login: $(whoami) from <ip>" sound=sifi-lock` on SSH login (guarded against repeats).
 - Sends a “Server Setup Complete” push at the end of the run.
 
 ## Panels/tools
