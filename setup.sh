@@ -156,10 +156,11 @@ printf "$ST Customizing motd \n $SB"
 # Install prerequisites
 apt install lolcat linuxlogo toilet figlet cowsay fortune -y
 
-# Backup up original motd
-if [[ -f /etc/motd ]]; then
+# Backup up original motd and ensure we target dynamic motd
+if [[ -f /etc/motd && ! -L /etc/motd ]]; then
   mv /etc/motd /etc/motd.bak
 fi
+ln -sf /run/motd /etc/motd
 
 # Comment out original linux os and kernel info
 sed -i -e 's/uname -snrvm/#uname -snrvm/g' /etc/update-motd.d/10-uname
