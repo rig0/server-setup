@@ -73,38 +73,34 @@ usermod -aG sudo $user
 echo  $user"   ALL=(ALL:ALL) ALL" >> /etc/sudoers
 
 # Check if pushover options were passed
-if [[ -n $usrkey ]]; then
+if [[ -n $usrkey && -n $appkey ]]; then
         printf "$ST Downloading and configuring Pushover notifications. \n $SB"
 
         #get main interface ip
         ip=$(ip route get 8.8.8.8 | awk '/src/ {print $7}')
 
         #pushover notification options
-        PO_USER_KEY=$usrkey
-        PO_APP_KEY=$appkey
-        PO_TITLE=$hostname
         PO_SOUND="gamelan"
         PO_URL="ssh://$ip:22"
 
         # download pushover script
-        git clone https://rigslab.com/Rambo/Pushover.git
-        chmod +x ./Pushover/install-pushover.sh
-        ./Pushover/install-pushover.sh $PO_TITLE $PO_USER_KEY $PO_APP_KEY $PO_SOUND $PO_URL
-        chmod +x /usr/bin/pushover
-        rm -R ./Pushover
+        tmpdir=$(mktemp -d)
+        git clone https://rigslab.com/Rambo/pushover.git "$tmpdir/pushover"
+        chmod +x "$tmpdir/pushover/install-pushover.sh"
+        "$tmpdir/pushover/install-pushover.sh" title="$hostname" user="$usrkey" token="$appkey" sound="$PO_SOUND" url="$PO_URL"
+        rm -rf "$tmpdir"
 
-        printf "$ST Creating Login notification script \n $SB"
-        touch /usr/bin/authee
-        echo "#!/bin/bash" >> /usr/bin/authee
-        echo "#Login Notification" >> /usr/bin/authee
-        echo "MESSAGE=\"SSH Login: \`whoami\`\"" >> /usr/bin/authee
-        echo "wget https://api.pushover.net/1/messages.json --post-data=\"token=$PO_APP_KEY&user=$PO_USER_KEY&message=\$MESSAGE&title=$PO_TITLE&url=$PO_URL&sound=$PO_SOUND\" -qO- > /dev/null 2>&1 &" >> /usr/bin/authee
-        echo "#call a shell to open for the ssh session" >> /usr/bin/authee
-        echo "#/bin/bash" >> /usr/bin/authee
-        echo "#Subsystem sftp /usr/lib/openssh/sftp-server" >> /usr/bin/authee
-        chmod +x /usr/bin/authee
-        echo "#LOGIN NOTIFICATION SCRIPT" >> /home/$user/.bashrc
-        echo "bash authee" >> /home/$user/.bashrc
+        printf "$ST Enabling SSH login notifications \n $SB"
+        cat <<'EOF' >> "/home/$user/.bashrc"
+# Pushover SSH login notification
+if [[ -n "$SSH_CONNECTION" && -z "$PUSHOVER_LOGIN_SENT" ]]; then
+  export PUSHOVER_LOGIN_SENT=1
+  login_from="${SSH_CLIENT%% *}"
+  pushover message="SSH login: $(whoami) from ${login_from:-unknown}"
+fi
+EOF
+elif [[ -n $usrkey || -n $appkey ]]; then
+        printf "$ST Skipping Pushover install (both usrkey and appkey are required). \n $SB"
 fi
 
 
