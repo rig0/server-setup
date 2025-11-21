@@ -45,7 +45,7 @@ done
 
 # Check if required arguments are provided
 if [[ -z $user || -z $hostname ]]; then
-  printf "Usage: $0 user=username hostname=hostname usrkey=pushoveruserkey* appkey=pushoverappkey* panel=cloudpanel* proxmox=1* sshkey=yourpubkey* \n *=optional"
+  printf "Usage: $0 user=username hostname=hostname usrkey=pushoveruserkey* appkey=pushoverappkey* panel=cloudpanel|tinycp|webmin|dockge|portainer|openvpn|steam* proxmox=1* sshkey=yourpubkey* \n *=optional"
   exit 1
 fi
 
@@ -265,6 +265,32 @@ case $panel in
 
         # Start dockge
         docker compose -f /opt/dockge/compose.yaml up -d
+        ;;
+    portainer)
+        printf "$ST Installing Docker & Portainer \n $SB"
+
+        # Install docker
+        install -m 0755 -d /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+        chmod a+r /etc/apt/keyrings/docker.asc
+        echo   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+        $(. /etc/os-release && echo "$VERSION_CODENAME") stable" |   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        apt update && apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+
+        # Add user to docker group
+        usermod -aG docker $user
+
+        # Deploy portainer
+        docker volume create portainer_data
+        docker run -d --name portainer --restart=always -p 9443:9443 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
+
+        # Allow access to the Portainer UI
+        user_ip=$(echo $SSH_CLIENT | awk '{print $1}')
+        if [[ -n "$user_ip" ]]; then
+            ufw allow from $user_ip to any port 9443
+        else
+            ufw allow 9443/tcp
+        fi
         ;;
     *)
         echo "No panel chosen."

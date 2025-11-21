@@ -5,7 +5,7 @@
 ## Copy and Install
 
 ```bash
-curl -O https://rigslab.com/Rambo/Server-Setup/raw/branch/main/setup.sh && chmod +x setup.sh && ./setup.sh hostname=HOSTNAME user=USERNAME
+curl -O https://rigslab.com/Rambo/server-setup/raw/branch/main/setup.sh && chmod +x setup.sh && ./setup.sh hostname=HOSTNAME user=USERNAME
 ```
 
 ## Arguments
@@ -15,7 +15,7 @@ curl -O https://rigslab.com/Rambo/Server-Setup/raw/branch/main/setup.sh && chmod
 - *sshkey*:* Your ssh client public sshkey
 - *usrkey*:* Pushover user api key
 - *appkey*:* Pushover app api key
-- *panel*:* Software to install (cloudpanel, tinycp, webmin, dockge, openvpn, steam)
+- *panel*:* Software to install (cloudpanel, tinycp, webmin, dockge, portainer, openvpn, steam)
 - *proxmox*:* 1 if system is a proxmox virtual machine
 
 *= Optional
@@ -48,6 +48,9 @@ Adds your ssh client's pubkey to authorized_keys if not pre-configured
 **Panels/Software**
 - ``panel=dockge``
 Installs [Dockge](https://github.com/louislam/dockge)
+
+- ``panel=portainer``
+Installs Docker & [Portainer CE](https://www.portainer.io/) (UI on port 9443)
 
 - ``panel=cloudpanel``
 Installs [CloudPanel](https://cloudpanel.io) (will break on next update, needs fixing)
