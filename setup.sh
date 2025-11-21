@@ -178,10 +178,11 @@ case $panel in
         # Add to hosts file
         echo "$ip $hostname" >> /etc/hosts
 
-        # Install cloudpanel # update to be dynamic, breaks every update
-        curl -sS https://installer.cloudpanel.io/ce/v2/install.sh -o install.sh; \
-        echo "2aefee646f988877a31198e0d84ed30e2ef7a454857b606608a1f0b8eb6ec6b6 install.sh" | \
-        sha256sum -c && sudo bash install.sh
+        # Install CloudPanel (fetch latest installer + checksum)
+        installer_url="https://installer.cloudpanel.io/ce/v2/install.sh"
+        curl -sS "$installer_url" -o install.sh
+        curl -sS "${installer_url}.sha256" -o install.sh.sha256
+        sha256sum -c install.sh.sha256 && sudo bash install.sh
 
         # Get u
         user_ip=$(echo $SSH_CLIENT | awk '{print $1}')

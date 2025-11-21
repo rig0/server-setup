@@ -53,7 +53,7 @@ Installs [Dockge](https://github.com/louislam/dockge)
 Installs Docker & [Portainer CE](https://www.portainer.io/) (UI on port 9443)
 
 - ``panel=cloudpanel``
-Installs [CloudPanel](https://cloudpanel.io) (will break on next update, needs fixing)
+Installs [CloudPanel](https://cloudpanel.io) using the latest installer and checksum
 
 - ``panel=webmin``
 Installs [Webmin](https://tinycp.com/)
@@ -66,7 +66,6 @@ Installs steamcmd and adjust system setttings to play nice with game servers
 
 
 ## To Do:
-- Make cloudpanel install dynamic
 - Make user creation optional for the scenario where a user is pre configured and root has been pre disabled
 - Make tabby envs optional (ex. tabby=1)
 - Make motd and vanity stuff optional (ex. vanity=1)
