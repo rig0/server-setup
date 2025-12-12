@@ -154,7 +154,7 @@ echo "Done."
 printf "$ST Customizing motd \n $SB"
 
 # Install prerequisites
-apt install lolcat linuxlogo toilet figlet cowsay fortune-mod -y
+apt install sudo lolcat linuxlogo toilet figlet cowsay fortune-mod -y
 
 # Backup up original motd
 mv /etc/motd /etc/motd.bak
